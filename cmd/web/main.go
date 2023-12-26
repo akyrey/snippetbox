@@ -3,27 +3,25 @@ package main
 import (
 	"log"
 	"net/http"
+
+	"github.com/akyrey/snippetbox/internal"
 )
 
 func main() {
-	mux := http.NewServeMux()
-	// Create a file server which serves files out of the "./ui/static" directory.
-	// Note that the path given to the http.Dir function is relative to the project
-	// directory root.
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
+	config := internal.Config{}
+	config.Parse()
 
-	// Use the mux.Handle() function to register the file server as the handler for
-	// all URL paths that start with "/static/". For matching paths, we strip the
-	// "/static" prefix before the request reaches the file server.
+	mux := http.NewServeMux()
+	fileServer := http.FileServer(http.Dir(config.StaticDir))
+
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	// Register the other application routes as normal.
 	mux.HandleFunc("/", home)
 	mux.HandleFunc("/snippet/view", snippetView)
 	mux.HandleFunc("/snippet/create", snippetCreate)
 
-	log.Print("starting server on :4000")
+	log.Printf("starting server on %s\n", config.Addr)
 
-	err := http.ListenAndServe(":4000", mux)
+	err := http.ListenAndServe(config.Addr, mux)
 	log.Fatal(err)
 }
