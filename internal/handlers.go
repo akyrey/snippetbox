@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -43,7 +44,19 @@ func (app *Application) SnippetViewHandler() http.HandlerFunc {
 			return
 		}
 
-		fmt.Fprintf(w, "Display a specific snippet with ID %d", id)
+		snippets := models.SnippetModel{DB: app.DB}
+		snippet, err := snippets.Get(id)
+		if err != nil {
+			if errors.Is(err, models.ErrNoRecord) {
+				app.notFound(w)
+				return
+			}
+
+			app.serverError(w, r, err)
+			return
+		}
+
+		fmt.Fprintf(w, "%+v", snippet)
 	}
 }
 
