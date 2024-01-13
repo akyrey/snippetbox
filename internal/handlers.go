@@ -5,6 +5,8 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+
+	"github.com/akyrey/snippetbox/internal/models"
 )
 
 func (app *Application) HomeHandler() http.HandlerFunc {
@@ -52,6 +54,18 @@ func (app *Application) SnipperCreateHandler() http.HandlerFunc {
 			app.clientError(w, http.StatusMethodNotAllowed)
 			return
 		}
-		w.Write([]byte("Create a new snippet..."))
+
+		title := "O snail"
+		content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n- Kobayashi Issa"
+		expires := 7
+
+		snippets := models.SnippetModel{DB: app.DB}
+		id, err := snippets.Insert(title, content, expires)
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/snippet/view?id=%d", id), http.StatusSeeOther)
 	}
 }

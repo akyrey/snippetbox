@@ -8,7 +8,7 @@ import (
 
 type Application struct {
 	Logger *slog.Logger
-	Db     *sql.DB
+	DB     *sql.DB
 }
 
 func (app *Application) Routes(config Config) *http.ServeMux {

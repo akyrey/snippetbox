@@ -36,7 +36,7 @@ func main() {
 
 	app := &internal.Application{
 		Logger: logger,
-		Db:     db,
+		DB:     db,
 	}
 
 	logger.Info("starting server", slog.String("addr", config.Addr))
