@@ -1,14 +1,12 @@
-package main
+package internal
 
 import (
 	"log/slog"
 	"net/http"
 	"runtime/debug"
-
-	"github.com/akyrey/snippetbox/internal"
 )
 
-func serverError(app *internal.Application, w http.ResponseWriter, r *http.Request, err error) {
+func (app *Application) serverError(w http.ResponseWriter, r *http.Request, err error) {
 	app.Logger.Error(
 		err.Error(),
 		slog.String("method", r.Method),
@@ -18,10 +16,10 @@ func serverError(app *internal.Application, w http.ResponseWriter, r *http.Reque
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
 
-func clientError(w http.ResponseWriter, status int) {
+func (app *Application) clientError(w http.ResponseWriter, status int) {
 	http.Error(w, http.StatusText(status), status)
 }
 
-func notFound(w http.ResponseWriter) {
-	clientError(w, http.StatusNotFound)
+func (app *Application) notFound(w http.ResponseWriter) {
+	app.clientError(w, http.StatusNotFound)
 }

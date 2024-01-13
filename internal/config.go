@@ -2,7 +2,6 @@ package internal
 
 import (
 	"flag"
-	"log/slog"
 )
 
 type Config struct {
@@ -15,8 +14,4 @@ func (c *Config) Parse() {
 	flag.StringVar(&c.StaticDir, "static-dir", "./ui/static/", "Path to static assets")
 
 	flag.Parse()
-}
-
-type Application struct {
-	Logger *slog.Logger
 }
