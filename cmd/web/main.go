@@ -8,10 +8,6 @@ import (
 	"github.com/akyrey/snippetbox/internal"
 )
 
-type Application struct {
-	logger *slog.Logger
-}
-
 func main() {
 	config := internal.Config{}
 	config.Parse()
@@ -21,8 +17,8 @@ func main() {
 		Level:     slog.LevelDebug,
 	}))
 
-	app := &Application{
-		logger: logger,
+	app := &internal.Application{
+		Logger: logger,
 	}
 
 	mux := http.NewServeMux()
@@ -30,9 +26,9 @@ func main() {
 	fileServer := http.FileServer(http.Dir(config.StaticDir))
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("/snippet/view", app.snippetView)
-	mux.HandleFunc("/snippet/create", app.snippetCreate)
+	mux.HandleFunc("/", HomeHandler(app))
+	mux.HandleFunc("/snippet/view", SnippetViewHandler(app))
+	mux.HandleFunc("/snippet/create", SnipperCreateHandler(app))
 
 	logger.Info("starting server", slog.String("addr", config.Addr))
 
