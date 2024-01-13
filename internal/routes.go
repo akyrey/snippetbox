@@ -1,12 +1,14 @@
 package internal
 
 import (
+	"database/sql"
 	"log/slog"
 	"net/http"
 )
 
 type Application struct {
 	Logger *slog.Logger
+	Db     *sql.DB
 }
 
 func (app *Application) Routes(config Config) *http.ServeMux {
