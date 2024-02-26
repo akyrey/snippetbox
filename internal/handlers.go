@@ -17,6 +17,13 @@ func (app *Application) HomeHandler() http.HandlerFunc {
 			return
 		}
 
+		snippetModel := models.SnippetModel{DB: app.DB}
+		snippets, err := snippetModel.Latest()
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
 		files := []string{
 			"./ui/html/base.tmpl",
 			"./ui/html/partials/nav.tmpl",
@@ -29,7 +36,11 @@ func (app *Application) HomeHandler() http.HandlerFunc {
 			return
 		}
 
-		err = ts.ExecuteTemplate(w, "base", nil)
+		data := templateData{
+			Snippets: snippets,
+		}
+
+		err = ts.ExecuteTemplate(w, "base", data)
 		if err != nil {
 			app.serverError(w, r, err)
 		}
@@ -69,7 +80,7 @@ func (app *Application) SnippetViewHandler() http.HandlerFunc {
 		}
 
 		data := templateData{
-			Snippet: *snippet,
+			Snippet: snippet,
 		}
 
 		err = ts.ExecuteTemplate(w, "base", data)
