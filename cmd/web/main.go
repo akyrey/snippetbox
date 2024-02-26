@@ -34,9 +34,16 @@ func main() {
 	}
 	defer db.Close()
 
+	templateCache, err := internal.NewTemplateDate()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	app := &internal.Application{
-		Logger: logger,
-		DB:     db,
+		Logger:        logger,
+		DB:            db,
+		TemplateCache: templateCache,
 	}
 
 	logger.Info("starting server", slog.String("addr", config.Addr))
