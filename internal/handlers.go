@@ -23,7 +23,10 @@ func (app *Application) HomeHandler() http.HandlerFunc {
 			return
 		}
 
-		app.render(w, r, http.StatusOK, "home.tmpl", &templateData{Snippets: snippets})
+		data := NewTemplateData(r)
+		data.Snippets = snippets
+
+		app.render(w, r, http.StatusOK, "home.tmpl", &data)
 	}
 }
 
@@ -47,7 +50,10 @@ func (app *Application) SnippetViewHandler() http.HandlerFunc {
 			return
 		}
 
-		app.render(w, r, http.StatusOK, "view.tmpl", &templateData{Snippet: snippet})
+		data := NewTemplateData(r)
+		data.Snippet = snippet
+
+		app.render(w, r, http.StatusOK, "view.tmpl", &data)
 	}
 }
 
