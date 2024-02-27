@@ -34,7 +34,7 @@ func main() {
 	}
 	defer db.Close()
 
-	templateCache, err := internal.NewTemplateDate()
+	templateCache, err := internal.NewTemplateCache()
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)

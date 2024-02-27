@@ -12,7 +12,7 @@ type templateData struct {
 	Snippets []*models.Snippet
 }
 
-func NewTemplateDate() (map[string]*template.Template, error) {
+func NewTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
 	pages, err := filepath.Glob("./ui/html/pages/*.tmpl")
@@ -23,12 +23,12 @@ func NewTemplateDate() (map[string]*template.Template, error) {
 	for _, page := range pages {
 		name := filepath.Base(page)
 
-    ts, err := template.ParseFiles("./ui/html/base.tmpl")
+		ts, err := template.ParseFiles("./ui/html/base.tmpl")
 		if err != nil {
 			return nil, err
 		}
 
-    ts, err = ts.ParseGlob("./ui/html/partials/*.tmpl")
+		ts, err = ts.ParseGlob("./ui/html/partials/*.tmpl")
 		if err != nil {
 			return nil, err
 		}
