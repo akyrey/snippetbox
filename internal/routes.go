@@ -5,6 +5,8 @@ import (
 	"html/template"
 	"log/slog"
 	"net/http"
+
+  "github.com/justinas/alice"
 )
 
 type Application struct {
@@ -13,7 +15,7 @@ type Application struct {
 	TemplateCache map[string]*template.Template
 }
 
-func (app *Application) Routes(config Config) *http.ServeMux {
+func (app *Application) Routes(config Config) http.Handler {
 	mux := http.NewServeMux()
 
 	fileServer := http.FileServer(http.Dir(config.StaticDir))
@@ -23,5 +25,8 @@ func (app *Application) Routes(config Config) *http.ServeMux {
 	mux.HandleFunc("/snippet/view", app.SnippetViewHandler())
 	mux.HandleFunc("/snippet/create", app.SnipperCreateHandler())
 
-	return mux
+  // logRequest ↔ secureHeaders ↔ servemux ↔ application handler
+  standard := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
+
+	return standard.Then(mux)
 }
