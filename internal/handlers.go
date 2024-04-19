@@ -13,10 +13,10 @@ import (
 // snippetCreateForm is a struct that represents the form fields for creating a new snippet.
 // All fields must be exported so that the template will be able to access them.
 type snippetCreateForm struct {
-	validator.Validator
-	Title   string
-	Content string
-	Expires int
+	validator.Validator `form:"-"`
+	Title               string `form:"title"`
+	Content             string `form:"content"`
+	Expires             int    `form:"expires"`
 }
 
 func (app *Application) home(w http.ResponseWriter, r *http.Request) {
@@ -68,22 +68,12 @@ func (app *Application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	var form snippetCreateForm
+
+	err := app.decodePostForm(r, &form)
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
-	}
-
-	expires, err := strconv.Atoi(r.PostForm.Get("expires"))
-	if err != nil {
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
-
-	form := snippetCreateForm{
-		Title:   r.PostForm.Get("title"),
-		Content: r.PostForm.Get("content"),
-		Expires: expires,
 	}
 
 	form.CheckField(

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 
@@ -40,9 +41,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	formDecoder := form.NewDecoder()
+
 	app := &internal.Application{
-		Logger:        logger,
 		DB:            db,
+		FormDecoder:   formDecoder,
+		Logger:        logger,
 		TemplateCache: templateCache,
 	}
 

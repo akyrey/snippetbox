@@ -6,12 +6,14 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/go-playground/form/v4"
 	"github.com/justinas/alice"
 )
 
 type Application struct {
-	Logger        *slog.Logger
 	DB            *sql.DB
+	FormDecoder   *form.Decoder
+	Logger        *slog.Logger
 	TemplateCache map[string]*template.Template
 }
 

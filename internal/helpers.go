@@ -2,10 +2,13 @@ package internal
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"runtime/debug"
+
+	"github.com/go-playground/form/v4"
 )
 
 func (app *Application) serverError(w http.ResponseWriter, r *http.Request, err error) {
@@ -47,4 +50,23 @@ func (app *Application) render(w http.ResponseWriter, r *http.Request, status in
 	if err != nil {
 		app.serverError(w, r, err)
 	}
+}
+
+// Decode the form data into the destination struct.
+func (app *Application) decodePostForm(r *http.Request, dst any) error {
+	err := r.ParseForm()
+	if err != nil {
+		return err
+	}
+
+	err = app.FormDecoder.Decode(&dst, r.PostForm)
+	if err != nil {
+		// If we try to use an invalid target destination, Decode function will return the InvalidDecoderError error
+		var invalidDecoderError *form.InvalidDecoderError
+		if errors.As(err, &invalidDecoderError) {
+			panic(err)
+		}
+		return err
+	}
+	return nil
 }
