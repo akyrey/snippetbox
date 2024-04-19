@@ -78,6 +78,10 @@ func main() {
 		// Use the custom logger for all server logs.
 		ErrorLog:  slog.NewLogLogger(logger.Handler(), slog.LevelError),
 		TLSConfig: tlsConfig,
+		// Server-wide settings which act on the underlying connection.
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	logger.Info("starting server", slog.String("addr", srv.Addr))
