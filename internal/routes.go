@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/akyrey/snippetbox/internal/models"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
 	"github.com/justinas/alice"
@@ -16,6 +17,7 @@ type Application struct {
 	FormDecoder    *form.Decoder
 	Logger         *slog.Logger
 	SessionManager *scs.SessionManager
+	Snippets       *models.SnippetModel
 	TemplateCache  map[string]*template.Template
 }
 

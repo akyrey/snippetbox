@@ -13,6 +13,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/akyrey/snippetbox/internal"
+	"github.com/akyrey/snippetbox/internal/models"
 )
 
 func main() {
@@ -55,6 +56,7 @@ func main() {
 		FormDecoder:    formDecoder,
 		Logger:         logger,
 		SessionManager: sessionManager,
+		Snippets:       &models.SnippetModel{DB: db},
 		TemplateCache:  templateCache,
 	}
 

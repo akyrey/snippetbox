@@ -20,8 +20,7 @@ type snippetCreateForm struct {
 }
 
 func (app *Application) home(w http.ResponseWriter, r *http.Request) {
-	snippetModel := models.SnippetModel{DB: app.DB}
-	snippets, err := snippetModel.Latest()
+	snippets, err := app.Snippets.Latest()
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -40,8 +39,7 @@ func (app *Application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	snippets := models.SnippetModel{DB: app.DB}
-	snippet, err := snippets.Get(id)
+	snippet, err := app.Snippets.Get(id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			app.notFound(w)
@@ -104,8 +102,7 @@ func (app *Application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	snippets := models.SnippetModel{DB: app.DB}
-	id, err := snippets.Insert(form.Title, form.Content, form.Expires)
+	id, err := app.Snippets.Insert(form.Title, form.Content, form.Expires)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
