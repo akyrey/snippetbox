@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"log/slog"
 	"net/http"
 	"os"
@@ -57,11 +58,26 @@ func main() {
 		TemplateCache:  templateCache,
 	}
 
+	tlsConfig := &tls.Config{
+		// Support cipher suites which use ECDHE (forward secrecy) only for TLS 1.0-1.2
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+		},
+		// Prefer to use elliptic curves with assembly implementations
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
+
 	srv := &http.Server{
 		Addr:    config.Addr,
 		Handler: app.Routes(config),
 		// Use the custom logger for all server logs.
-		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		ErrorLog:  slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		TLSConfig: tlsConfig,
 	}
 
 	logger.Info("starting server", slog.String("addr", srv.Addr))
