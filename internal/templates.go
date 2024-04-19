@@ -10,6 +10,7 @@ import (
 )
 
 type templateData struct {
+	Flash       string
 	Form        any
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
@@ -24,9 +25,10 @@ var functions = template.FuncMap{
 	"humanDate": humanDate,
 }
 
-func NewTemplateData(r *http.Request) templateData {
+func (app *Application) NewTemplateData(r *http.Request) templateData {
 	return templateData{
 		CurrentYear: time.Now().Year(),
+		Flash:       app.SessionManager.PopString(r.Context(), "flash"),
 	}
 }
 

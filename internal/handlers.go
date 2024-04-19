@@ -27,7 +27,7 @@ func (app *Application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := NewTemplateData(r)
+	data := app.NewTemplateData(r)
 	data.Snippets = snippets
 
 	app.render(w, r, http.StatusOK, "home.tmpl", &data)
@@ -52,14 +52,14 @@ func (app *Application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := NewTemplateData(r)
+	data := app.NewTemplateData(r)
 	data.Snippet = snippet
 
 	app.render(w, r, http.StatusOK, "view.tmpl", &data)
 }
 
 func (app *Application) snippetCreate(w http.ResponseWriter, r *http.Request) {
-	data := NewTemplateData(r)
+	data := app.NewTemplateData(r)
 	data.Form = snippetCreateForm{
 		Expires: 365,
 	}
@@ -98,7 +98,7 @@ func (app *Application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 	)
 
 	if !form.IsValid() {
-		data := NewTemplateData(r)
+		data := app.NewTemplateData(r)
 		data.Form = form
 		app.render(w, r, http.StatusUnprocessableEntity, "create.tmpl", &data)
 		return
@@ -110,6 +110,8 @@ func (app *Application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		app.serverError(w, r, err)
 		return
 	}
+
+	app.SessionManager.Put(r.Context(), "flash", "Snippet successfully created!")
 
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
