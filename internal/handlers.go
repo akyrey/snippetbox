@@ -5,19 +5,18 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
-	"unicode/utf8"
 
 	"github.com/akyrey/snippetbox/internal/models"
+	"github.com/akyrey/snippetbox/internal/validator"
 )
 
 // snippetCreateForm is a struct that represents the form fields for creating a new snippet.
 // All fields must be exported so that the template will be able to access them.
 type snippetCreateForm struct {
-	FieldErrors map[string]string
-	Title       string
-	Content     string
-	Expires     int
+	validator.Validator
+	Title   string
+	Content string
+	Expires int
 }
 
 func (app *Application) home(w http.ResponseWriter, r *http.Request) {
@@ -82,26 +81,33 @@ func (app *Application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 	}
 
 	form := snippetCreateForm{
-		Title:       r.PostForm.Get("title"),
-		Content:     r.PostForm.Get("content"),
-		Expires:     expires,
-		FieldErrors: make(map[string]string),
+		Title:   r.PostForm.Get("title"),
+		Content: r.PostForm.Get("content"),
+		Expires: expires,
 	}
 
-	if strings.TrimSpace(form.Title) == "" {
-		form.FieldErrors["title"] = "This field cannot be blank"
-	} else if utf8.RuneCountInString(form.Title) > 100 {
-		// NOTE: utf8.RuneCountInString counts the number of unicode code points
-		form.FieldErrors["title"] = "This field cannot be more than 100 characters long"
-	}
-	if strings.TrimSpace(form.Content) == "" {
-		form.FieldErrors["content"] = "This field cannot be blank"
-	}
-	if form.Expires != 1 && form.Expires != 7 && form.Expires != 365 {
-		form.FieldErrors["expires"] = "This field must equal 1, 7 or 365"
-	}
+	form.CheckField(
+		validator.NotBlank(form.Title),
+		"title",
+		"This field cannot be blank",
+	)
+	form.CheckField(
+		validator.MaxChars(form.Title, 100),
+		"title",
+		"This field cannot be more than 100 characters long",
+	)
+	form.CheckField(
+		validator.NotBlank(form.Content),
+		"content",
+		"This field cannot be blank",
+	)
+	form.CheckField(
+		validator.PermittedValue(form.Expires, 1, 7, 365),
+		"expires",
+		"This field must equal 1, 7 or 365",
+	)
 
-	if len(form.FieldErrors) > 0 {
+	if !form.IsValid() {
 		data := NewTemplateData(r)
 		data.Form = form
 		app.render(w, r, http.StatusUnprocessableEntity, "create.tmpl", &data)
