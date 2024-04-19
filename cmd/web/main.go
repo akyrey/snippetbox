@@ -56,13 +56,16 @@ func main() {
 		TemplateCache:  templateCache,
 	}
 
-	logger.Info("starting server", slog.String("addr", config.Addr))
-
-	err = http.ListenAndServe(config.Addr, app.Routes(config))
-	logger.Error(err.Error())
-	os.Exit(1)
-}
+	srv := &http.Server{
+		Addr:    config.Addr,
+		Handler: app.Routes(config),
+		// Use the custom logger for all server logs.
+		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
 
+	logger.Info("starting server", slog.String("addr", srv.Addr))
 
+	err = srv.ListenAndServe()
+	logger.Error(err.Error())
+	os.Exit(1)
 }
