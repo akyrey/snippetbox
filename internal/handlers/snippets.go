@@ -1,4 +1,4 @@
-package internal
+package handlers
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/akyrey/snippetbox/internal"
 	"github.com/akyrey/snippetbox/internal/models"
 	"github.com/akyrey/snippetbox/internal/validator"
 )
@@ -19,7 +20,7 @@ type snippetCreateForm struct {
 	Expires             int    `form:"expires"`
 }
 
-func (app *Application) home(w http.ResponseWriter, r *http.Request) {
+func (app *internal.Application) home(w http.ResponseWriter, r *http.Request) {
 	snippets, err := app.Snippets.Latest()
 	if err != nil {
 		app.serverError(w, r, err)
@@ -112,92 +113,3 @@ func (app *Application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
-
-type userSignupForm struct {
-	validator.Validator `form:"-"`
-	Name                string `form:"name"`
-	Email               string `form:"email"`
-	Password            string `form:"password"`
-}
-
-func (app *Application) userSignup(w http.ResponseWriter, r *http.Request) {
-	data := app.NewTemplateData(r)
-	data.Form = userSignupForm{}
-	app.render(w, r, http.StatusOK, "signup.tmpl", &data)
-}
-
-func (app *Application) userSignupPost(w http.ResponseWriter, r *http.Request) {
-	var form userSignupForm
-
-	err := app.decodePostForm(r, &form)
-	if err != nil {
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
-
-	form.CheckField(
-		validator.NotBlank(form.Name),
-		"name",
-		"This field cannot be blank",
-	)
-	form.CheckField(
-		validator.MaxChars(form.Name, 255),
-		"name",
-		"This field cannot be more than 255 characters long",
-	)
-	form.CheckField(
-		validator.NotBlank(form.Email),
-		"email",
-		"This field cannot be blank",
-	)
-	form.CheckField(
-		validator.MaxChars(form.Email, 255),
-		"email",
-		"This field cannot be more than 255 characters long",
-	)
-	form.CheckField(
-		validator.Matches(form.Email, validator.EmailRegExp),
-		"email",
-		"This field must be a valid email address",
-	)
-	form.CheckField(
-		validator.NotBlank(form.Password),
-		"password",
-		"This field cannot be blank",
-	)
-	form.CheckField(
-		validator.MinChars(form.Password, 8),
-		"password",
-		"This field cannot be less than 8 characters long",
-	)
-
-	if !form.IsValid() {
-		data := app.NewTemplateData(r)
-		data.Form = form
-		app.render(w, r, http.StatusUnprocessableEntity, "signup.tmpl", &data)
-		return
-	}
-
-	err = app.Users.Insert(form.Name, form.Email, form.Password)
-	if err != nil {
-		if errors.Is(err, models.ErrDuplicateEmail) {
-			form.AddFieldError("email", "Email address is already in use")
-			data := app.NewTemplateData(r)
-			data.Form = form
-			app.render(w, r, http.StatusUnprocessableEntity, "signup.tmpl", &data)
-		} else {
-			app.serverError(w, r, err)
-		}
-		return
-	}
-
-	app.SessionManager.Put(r.Context(), "flash", "Your signup was successful. Please log in.")
-
-	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
-}
-
-func (app *Application) userLogin(w http.ResponseWriter, r *http.Request) {}
-
-func (app *Application) userLoginPost(w http.ResponseWriter, r *http.Request) {}
-
-func (app *Application) userLogoutPost(w http.ResponseWriter, r *http.Request) {}

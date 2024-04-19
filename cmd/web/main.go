@@ -57,6 +57,7 @@ func main() {
 		Logger:         logger,
 		SessionManager: sessionManager,
 		Snippets:       &models.SnippetModel{DB: db},
+		Users:          &models.UserModel{DB: db},
 		TemplateCache:  templateCache,
 	}
 
