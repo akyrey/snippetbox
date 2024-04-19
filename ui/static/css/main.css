@@ -168,6 +168,14 @@ form div:last-child {
     border-top: 1px dashed #E4E5E7;
 }
 
+form fieldset {
+    border: 0 none;
+
+    input, label {
+        cursor: pointer;
+    }
+}
+
 form input[type="radio"] {
     margin-left: 18px;
 }

@@ -6,7 +6,8 @@ import (
 	"log/slog"
 	"net/http"
 
-  "github.com/justinas/alice"
+	"github.com/julienschmidt/httprouter"
+	"github.com/justinas/alice"
 )
 
 type Application struct {
@@ -16,17 +17,23 @@ type Application struct {
 }
 
 func (app *Application) Routes(config Config) http.Handler {
-	mux := http.NewServeMux()
+	router := httprouter.New()
+
+	// router.MethodNotAllowed could also be assigned some custom handler
+	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		app.notFound(w)
+	})
 
 	fileServer := http.FileServer(http.Dir(config.StaticDir))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	router.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("/", app.HomeHandler())
-	mux.HandleFunc("/snippet/view", app.SnippetViewHandler())
-	mux.HandleFunc("/snippet/create", app.SnipperCreateHandler())
+	router.HandlerFunc(http.MethodGet, "/", app.home)
+	router.HandlerFunc(http.MethodGet, "/snippet/view/:id", app.snippetView)
+	router.HandlerFunc(http.MethodGet, "/snippet/create", app.snippetCreate)
+	router.HandlerFunc(http.MethodPost, "/snippet/create", app.snippetCreatePost)
 
-  // logRequest ↔ secureHeaders ↔ servemux ↔ application handler
-  standard := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
+	// logRequest ↔ secureHeaders ↔ servemux ↔ application handler
+	standard := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 
-	return standard.Then(mux)
+	return standard.Then(router)
 }
