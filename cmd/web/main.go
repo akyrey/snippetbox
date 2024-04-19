@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"log/slog"
 	"net/http"
 	"os"
@@ -10,7 +9,6 @@ import (
 	"github.com/alexedwards/scs/mysqlstore"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 
 	"github.com/akyrey/snippetbox/internal"
@@ -31,7 +29,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	db, err := openDb()
+	db, err := config.OpenDb()
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
@@ -64,18 +62,7 @@ func main() {
 	logger.Error(err.Error())
 	os.Exit(1)
 }
-
-func openDb() (*sql.DB, error) {
-	db, err := sql.Open("mysql", os.Getenv("DSN"))
-	if err != nil {
-		return nil, err
 	}
 
-	err = db.Ping()
-	if err != nil {
-		db.Close()
-		return nil, err
-	}
 
-	return db, nil
 }
