@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/akyrey/snippetbox/internal/models"
-	"github.com/julienschmidt/httprouter"
 )
 
 func (app *Application) home(w http.ResponseWriter, r *http.Request) {
@@ -25,8 +24,7 @@ func (app *Application) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) snippetView(w http.ResponseWriter, r *http.Request) {
-	params := httprouter.ParamsFromContext(r.Context())
-	id, err := strconv.Atoi(params.ByName("id"))
+	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
 		app.notFound(w)
 		return
