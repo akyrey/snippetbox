@@ -6,30 +6,34 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
 	"github.com/justinas/alice"
 )
 
 type Application struct {
-	DB            *sql.DB
-	FormDecoder   *form.Decoder
-	Logger        *slog.Logger
-	TemplateCache map[string]*template.Template
+	DB             *sql.DB
+	FormDecoder    *form.Decoder
+	Logger         *slog.Logger
+	SessionManager *scs.SessionManager
+	TemplateCache  map[string]*template.Template
 }
 
 func (app *Application) Routes(config Config) http.Handler {
-	router := http.NewServeMux()
+	mux := http.NewServeMux()
 
 	fileServer := http.FileServer(http.Dir(config.StaticDir))
-	router.Handle("GET /static/", http.StripPrefix("/static", fileServer))
+	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
-	router.HandleFunc("GET /{$}", app.home)
-	router.HandleFunc("GET /snippet/view/{id}", app.snippetView)
-	router.HandleFunc("GET /snippet/create", app.snippetCreate)
-	router.HandleFunc("POST /snippet/create", app.snippetCreatePost)
+	dynamic := alice.New(app.SessionManager.LoadAndSave)
+
+	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
+	mux.Handle("GET /snippet/view/{id}", dynamic.ThenFunc(app.snippetView))
+	mux.Handle("GET /snippet/create", dynamic.ThenFunc(app.snippetCreate))
+	mux.Handle("POST /snippet/create", dynamic.ThenFunc(app.snippetCreatePost))
 
 	// logRequest ↔ secureHeaders ↔ servemux ↔ application handler
 	standard := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 
-	return standard.Then(router)
+	return standard.Then(mux)
 }

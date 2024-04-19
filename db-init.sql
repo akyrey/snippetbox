@@ -29,3 +29,15 @@ INSERT INTO snippets (title, content, created, expires) VALUES (
   UTC_TIMESTAMP(),
   DATE_ADD(UTC_TIMESTAMP(), INTERVAL 7 DAY)
 );
+
+-- Create a `session` table.
+CREATE TABLE sessions (
+  -- Unique randomly regenerated session token.
+  token CHAR(43) PRIMARY KEY,
+  -- Session data to share between HTTP requests.
+  data BLOB NOT NULL,
+  -- Expiry time for the session.
+  expiry TIMESTAMP(6) NOT NULL
+);
+
+CREATE INDEX sessions_expiry_idx ON sessions(expiry);
