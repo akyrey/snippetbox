@@ -1,10 +1,21 @@
 # Snippetbox from Let' Go
 
-Developing snippetbox example application following along "Let's Go" book from Alex Edwards
+Developing snippetbox example application following along "Let's Go" book
+from Alex Edwards
+
+## Generate TLS certificate
+
+To generate the certificate to use for development, run the following
+command inside TLS folder:
+
+```bash
+go run /usr/lib/go/src/crypto/tls/generate_cert.go --rsa-bits=2048 --host=localhost
+```
 
 ## Run the application
 
-Since we are going to run the database in a container, we need to create a network for the application and the database to communicate.
+Since we are going to run the database in a container,
+we need to create a network for the application and the database to communicate.
 
 ```bash
 dk network create snippetbox
@@ -28,5 +39,9 @@ dk run --rm -d \
 Then we can run the application with the following command:
 
 ```bash
-dk run -it --rm --network snippetbox -w $PWD -v $PWD:$PWD -p 4000:4000 docker.io/cosmtrek/air air
+dk run -it --rm \
+    --network snippetbox \
+    -w $PWD -v $PWD:$PWD \
+    -p 4000:4000 \
+    docker.io/cosmtrek/air air
 ```
