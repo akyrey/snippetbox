@@ -10,12 +10,13 @@ import (
 var EmailRegExp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 type Validator struct {
-	FieldErrors map[string]string
+	FieldErrors    map[string]string
+	NonFieldErrors []string
 }
 
 // IsValid returns true if there are no errors, otherwise false.
 func (v *Validator) IsValid() bool {
-	return len(v.FieldErrors) == 0
+	return len(v.FieldErrors) == 0 && len(v.NonFieldErrors) == 0
 }
 
 // AddFieldError adds an error message for a specific field to the FieldErrors map.
@@ -27,6 +28,10 @@ func (v *Validator) AddFieldError(field, message string) {
 	if _, exists := v.FieldErrors[field]; !exists {
 		v.FieldErrors[field] = message
 	}
+}
+
+func (v *Validator) AddNonFieldError(message string) {
+	v.NonFieldErrors = append(v.NonFieldErrors, message)
 }
 
 // CheckField checks a condition. If that fails, it adds an error message to the FieldErrors map.
