@@ -10,11 +10,12 @@ import (
 )
 
 type templateData struct {
-	Flash       string
-	Form        any
-	Snippet     *models.Snippet
-	Snippets    []*models.Snippet
-	CurrentYear int
+	Flash           string
+	Form            any
+	Snippet         *models.Snippet
+	Snippets        []*models.Snippet
+	CurrentYear     int
+	IsAuthenticated bool
 }
 
 func humanDate(t time.Time) string {
@@ -27,8 +28,9 @@ var functions = template.FuncMap{
 
 func (app *Application) NewTemplateData(r *http.Request) templateData {
 	return templateData{
-		CurrentYear: time.Now().Year(),
-		Flash:       app.SessionManager.PopString(r.Context(), "flash"),
+		CurrentYear:     time.Now().Year(),
+		Flash:           app.SessionManager.PopString(r.Context(), "flash"),
+		IsAuthenticated: app.IsAuthenticated(r),
 	}
 }
 
