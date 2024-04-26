@@ -8,14 +8,17 @@ on:
   pull_request:
     branches: [main]
   schedule:
-  - cron: '0 10 * * 1' # run "At 10:00 on Monday"
+    - cron: "0 10 * * 1" # run "At 10:00 on Monday"
   workflow_call:
     inputs:
       skipTests:
-        description: 'Skip tests, useful when there is a dedicated CI job for tests'
+        description: "Skip tests, useful when there is a dedicated CI job for tests"
         default: false
         required: false
         type: boolean
+
+env:
+  HOME: /home/runner
 
 jobs:
   run:
@@ -25,7 +28,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        go: ['stable', 'oldstable']
+        go: ["stable", "oldstable"]
 
     steps:
       - name: Check out code
