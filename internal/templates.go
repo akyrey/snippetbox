@@ -7,12 +7,14 @@ import (
 	"time"
 
 	"github.com/akyrey/snippetbox/internal/models"
+	"github.com/justinas/nosurf"
 )
 
 type templateData struct {
-	Flash           string
 	Form            any
 	Snippet         *models.Snippet
+	Flash           string
+	CSRFToken       string
 	Snippets        []*models.Snippet
 	CurrentYear     int
 	IsAuthenticated bool
@@ -29,6 +31,7 @@ var functions = template.FuncMap{
 func (app *Application) NewTemplateData(r *http.Request) templateData {
 	return templateData{
 		CurrentYear:     time.Now().Year(),
+		CSRFToken:       nosurf.Token(r),
 		Flash:           app.SessionManager.PopString(r.Context(), "flash"),
 		IsAuthenticated: app.IsAuthenticated(r),
 	}
