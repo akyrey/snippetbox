@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/akyrey/snippetbox/internal/models"
+	"github.com/akyrey/snippetbox/ui"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
 	"github.com/justinas/alice"
@@ -25,8 +26,7 @@ type Application struct {
 func (app *Application) Routes(config Config) http.Handler {
 	mux := http.NewServeMux()
 
-	fileServer := http.FileServer(http.Dir(config.StaticDir))
-	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
+	mux.Handle("GET /static/", http.FileServerFS(ui.Files))
 
 	dynamic := alice.New(app.SessionManager.LoadAndSave, noSurf, app.authenticate)
 

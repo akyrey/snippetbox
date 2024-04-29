@@ -2,11 +2,13 @@ package internal
 
 import (
 	"html/template"
+	"io/fs"
 	"net/http"
 	"path/filepath"
 	"time"
 
 	"github.com/akyrey/snippetbox/internal/models"
+	"github.com/akyrey/snippetbox/ui"
 	"github.com/justinas/nosurf"
 )
 
@@ -40,25 +42,20 @@ func (app *Application) NewTemplateData(r *http.Request) templateData {
 func NewTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
-	pages, err := filepath.Glob("./ui/html/pages/*.tmpl")
+	pages, err := fs.Glob(ui.Files, "html/pages/*.tmpl")
 	if err != nil {
 		return nil, err
 	}
 
 	for _, page := range pages {
 		name := filepath.Base(page)
-
-		ts, err := template.New(name).Funcs(functions).ParseFiles("./ui/html/base.tmpl")
-		if err != nil {
-			return nil, err
+		patterns := []string{
+			"html/base.tmpl",
+			"html/partials/nav.tmpl",
+			page,
 		}
 
-		ts, err = ts.ParseGlob("./ui/html/partials/*.tmpl")
-		if err != nil {
-			return nil, err
-		}
-
-		ts, err = ts.ParseFiles(page)
+		ts, err := template.New(name).Funcs(functions).ParseFS(ui.Files, patterns...)
 		if err != nil {
 			return nil, err
 		}
