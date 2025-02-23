@@ -1,6 +1,7 @@
 module github.com/akyrey/snippetbox
 
 go 1.22
+toolchain go1.23.6
 
 require (
 	github.com/alexedwards/scs/mysqlstore v0.0.0-20240316134038-7e11d57e8885
@@ -10,7 +11,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/justinas/alice v1.2.0
 	github.com/justinas/nosurf v1.1.1
-	golang.org/x/crypto v0.33.0
+	golang.org/x/crypto v0.34.0
 )
 
 require filippo.io/edwards25519 v1.1.0 // indirect
